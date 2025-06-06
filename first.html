@@ -1,0 +1,71 @@
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <title>Hammer Strength Test</title>
+        <link rel="stylesheet" href="second.css">
+    </head>
+    <body>
+        <img class="one" id = "image" src="Screenshot 2025-05-26 110435.png" height = "500px" width="400px">
+        <div class="two" id="hammer">🔨</div>
+        <div class="three" id="siren">🚨</div>
+        <button onclick= "ne()" class="four"></button>
+        <button onclick = "float()" class="five"></button>
+        <div class="six">Score:</div>
+        <div class="seven">Score:</div>
+    </body>
+    <script>
+          var x = -2;
+          var y = 1;
+          var posx = 810;
+          var truex = 810;
+          var truey = 330;
+          var posy = 330;
+          var id = null;
+        
+        function ne(){
+            document.body.style.backgroundColor = "skyblue";
+          var name= document.querySelector(".four");
+          name.style.backgroundColor = "skyblue";
+          var name2 = document.getElementById("hammer");
+         var name3 = document.getElementById("siren");
+         var name4 = document.getElementById("image");
+          name2.style.transform = "translate(-180px,100px) rotate(180deg)";
+          name4.style.transform = "rotate(180deg)";
+         name3.style.transition = "transform 0.2 ease-out"
+        const height = Math.floor(Math.random()*300)+30;
+        name3.style.transform = `translateY(-${height}px) rotate(180deg)`;
+         setTimeout(() => {
+        name2.style.transform = "translate(0, 0) ";
+      }, 500);
+       setTimeout(() => {
+        name3.style.transform = "translateY(0)"
+    },600);
+ }
+        function float(){
+            document.body.style.backgroundColor="lightcoral";
+            var name2 = document.getElementById("hammer");
+          name2.style.transform = "translate(-180px,120px)";
+            var name1 = document.querySelector(".five");
+            name1.style.backgroundColor="lightcoral";
+            var name3 = document.getElementById("siren");
+            name3.style.transition = "transform 0.2 ease-out"
+          const height = Math.floor(Math.random()*300)+30;
+         name3.style.transform = `translateY(-${height}px)`;
+     setTimeout(() => {
+        name2.style.transform = "translate(0, 0)";
+    }, 500);
+    setTimeout(() => {
+        name3.style.transform = "translateY(0)"
+    },600)
+        
+    }
+  
+
+
+
+
+    </script>
+
+</html>

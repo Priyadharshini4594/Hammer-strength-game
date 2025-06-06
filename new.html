@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connect Four: Blocked Edition</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 { margin-bottom: 10px; }
+    #game {
+      display: grid;
+      grid-template-columns: repeat(7, 60px);
+      grid-template-rows: repeat(6, 60px);
+      gap: 5px;
+      margin-bottom: 20px;
+    }
+    .cell {
+      width: 60px;
+      height: 60px;
+      background: #ddd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .red { background-color: red; }
+    .yellow { background-color: yellow; }
+    .blocked {
+      background-color: black !important;
+      cursor: not-allowed;
+    }
+    .controls { margin-bottom: 10px; }
+    #leaderboard {
+      margin-top: 20px;
+      width: 300px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Connect Four: Blocked Edition</h1>
+  <div class="controls">
+    <span id="status">Player 1's turn</span><br />
+    <span>Player 1 Time: <span id="timer1">30</span>s | Player 2 Time: <span id="timer2">30</span>s</span>
+  </div>
+  <div id="game"></div>
+
+  <div class="controls">
+    <label for="blockColumn">Block a column: </label>
+    <select id="blockColumn"></select>
+    <button onclick="blockColumn()">Block</button>
+  </div>
+
+  <div id="leaderboard">
+    <h3>Leaderboard</h3>
+    <ul id="scores"></ul>
+  </div>
+
+  <script>
+    const ROWS = 6, COLS = 7;
+    let board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+    let currentPlayer = 1;
+    let blockedCol = null;
+    let timers = [30, 30];
+    let interval;
+
+    const game = document.getElementById('game');
+    const statusText = document.getElementById('status');
+    const timer1 = document.getElementById('timer1');
+    const timer2 = document.getElementById('timer2');
+    const blockSelect = document.getElementById('blockColumn');
+    const scoresList = document.getElementById('scores');
+
+    function createBoard() {
+      game.innerHTML = '';
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          cell.addEventListener('click', () => dropDisc(c));
+          game.appendChild(cell);
+        }
+      }
+      updateBlockOptions();
+    }
+
+    function dropDisc(col) {
+      if (blockedCol === col || isColumnFull(col)) return;
+      for (let r = ROWS - 1; r >= 0; r--) {
+        if (!board[r][col]) {
+          board[r][col] = currentPlayer;
+          renderBoard();
+          if (checkWin(r, col)) return endGame(`Player ${currentPlayer} wins!`);
+          if (board.flat().every(cell => cell)) return endGame("It's a draw!");
+          switchPlayer();
+          return;
+        }
+      }
+    }
+
+    function isColumnFull(col) {
+      return board[0][col] !== null;
+    }
+
+    function blockColumn() {
+      const selected = parseInt(blockSelect.value);
+      if (!isColumnFull(selected)) blockedCol = selected;
+      renderBoard();
+    }
+
+    function updateBlockOptions() {
+      blockSelect.innerHTML = '';
+      for (let c = 0; c < COLS; c++) {
+        const option = document.createElement('option');
+        option.value = c;
+        option.textContent = `Column ${c + 1}`;
+        blockSelect.appendChild(option);
+      }
+    }
+
+    function renderBoard() {
+      const cells = game.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        const r = parseInt(cell.dataset.row);
+        const c = parseInt(cell.dataset.col);
+        cell.className = 'cell';
+        if (blockedCol === c && currentPlayer === 1) cell.classList.add('blocked');
+        if (board[r][c] === 1) cell.classList.add('red');
+        else if (board[r][c] === 2) cell.classList.add('yellow');
+      });
+    }
+
+    function switchPlayer() {
+      clearInterval(interval);
+      currentPlayer = 3 - currentPlayer;
+      blockedCol = null;
+      startTimer();
+      statusText.textContent = `Player ${currentPlayer}'s turn`;
+    }
+
+    function startTimer() {
+      interval = setInterval(() => {
+        timers[currentPlayer - 1]--;
+        timer1.textContent = timers[0];
+        timer2.textContent = timers[1];
+        if (timers[currentPlayer - 1] === 0) {
+          clearInterval(interval);
+          endGame(`Player ${3 - currentPlayer} wins by timeout!`);
+        }
+      }, 1000);
+    }
+
+    function endGame(message) {
+      clearInterval(interval);
+      alert(message);
+      saveToLeaderboard(message);
+      displayLeaderboard();
+    }
+
+    function saveToLeaderboard(result) {
+      const data = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+      data.push({ result, time: new Date().toLocaleString() });
+      localStorage.setItem('leaderboard', JSON.stringify(data));
+    }
+
+    function displayLeaderboard() {
+      scoresList.innerHTML = '';
+      const data = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+      data.slice().reverse().forEach(entry => {
+        const li = document.createElement('li');
+        li.textContent = `${entry.result} (${entry.time})`;
+        scoresList.appendChild(li);
+      });
+    }
+
+    createBoard();
+    startTimer();
+    displayLeaderboard();
+  </script>
+</body>
+</html>
